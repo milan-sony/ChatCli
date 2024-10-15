@@ -1,37 +1,48 @@
 import socket
 import threading
 
-host = '127.0.0.1'
-port = 12345
-
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-print(f"Connecting to {host}:{port}...")
-
-# connect to the server
-server_socket.connect((host, port))
-print("Connected to server")
-
-name = input("Enter your name: ")
+# Create a client socket to connect to the server
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 def listen_for_messages():
     while True:
-        message = server_socket.recv(1024).decode('utf-8')
-        print("\n" + message)
+        try:
+            message = client_socket.recv(1024).decode('utf-8')
+            if not message:
+                print("Disconnected from server")
+                break
+            print("\n" + message)
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            break
 
-# make a thread that listens for messages to this client & print them
-t = threading.Thread(target=listen_for_messages)
-# make the thread daemon so it ends whenever the main thread ends
-t.daemon = True
-# start the thread
-t.start()
-print("Thread started")
+def main():
+    host = '127.0.0.1'
+    port = 12345
 
-while True:
-    # message to send to the server
-    message_to_send = input()
-    if message_to_send.lower() == 'exit':
-        break
-    server_socket(message_to_send.encode('utf-8'))
+    print(f"Connecting to {host}:{port}...")
 
-server_socket.close()
+    # connect to the server
+    client_socket.connect((host, port))
+    print("Connected to server")
+
+    # make a thread that listens for messages to this client & print them
+    t = threading.Thread(target=listen_for_messages)
+    t.daemon = True
+    t.start()
+    print("Thread started")
+
+    username = input("Enter your name: ")
+
+    while True:
+        # message to send to the server
+        message_to_send = input()
+        full_message = f"{username}: {message_to_send}"
+        if message_to_send.lower() == 'exit':
+            print("Disconnecting from server...")
+            client_socket.close()
+            break
+        client_socket.send(full_message.encode('utf-8'))
+
+if __name__ == "__main__":
+    main()
