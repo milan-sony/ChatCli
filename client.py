@@ -20,14 +20,14 @@ def main():
     host = '127.0.0.1'
     port = 12345
 
-    print(f"Connecting to {host}:{port}...")
+    print(f"Connecting to {host}:{port}")
 
     # connect to the server
     client_socket.connect((host, port))
     print("Connected to server")
 
     # make a thread that listens for messages to this client & print them
-    t = threading.Thread(target=listen_for_messages)
+    t = threading.Thread(target = listen_for_messages)
     t.daemon = True
     t.start()
     print("Thread started")
@@ -39,7 +39,7 @@ def main():
         message_to_send = input()
         full_message = f"{username}: {message_to_send}"
         if message_to_send.lower() == 'exit':
-            print("Disconnecting from server...")
+            print("Disconnected from server")
             client_socket.close()
             break
         client_socket.send(full_message.encode('utf-8'))
